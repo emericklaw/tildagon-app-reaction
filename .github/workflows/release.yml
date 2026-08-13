@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'tildagon.toml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,12 +16,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: '3.x'
 
@@ -39,7 +40,7 @@ jobs:
       - name: Check whether this release already exists
         id: check
         env:
-          GH_TOKEN: ${{ secrets.REPO_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           if gh release view "${{ steps.version.outputs.tag }}" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             echo "Release ${{ steps.version.outputs.tag }} already exists - skipping."
@@ -51,7 +52,19 @@ jobs:
       - name: Get commits since last release
         if: steps.check.outputs.exists == 'false'
         id: changes
-        uses: simbo/changes-since-last-release-action@v1
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            LOG=$(git log "$LAST_TAG"..HEAD --pretty=format:'- %s (%h)')
+          else
+            LOG=$(git log --pretty=format:'- %s (%h)')
+          fi
+          {
+            echo "last-tag=$LAST_TAG"
+            echo "log<<GHOUTPUTEOF"
+            echo "$LOG"
+            echo "GHOUTPUTEOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Write release notes
         if: steps.check.outputs.exists == 'false'
@@ -64,7 +77,7 @@ jobs:
       - name: Create Release
         if: steps.check.outputs.exists == 'false'
         env:
-          GH_TOKEN: ${{ secrets.REPO_GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh release create "${{ steps.version.outputs.tag }}" \
             --repo "${{ github.repository }}" \
