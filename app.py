@@ -9,6 +9,8 @@ from . import leds
 from .modes import MODES
 from .touch import TouchInput
 
+APP_VERSION = "0.1.0"
+
 MAIN_MENU_ITEMS = [mode.NAME for mode in MODES] + ["High Scores", "About"]
 MODE_BY_NAME = {mode.NAME: mode for mode in MODES}
 
@@ -65,7 +67,7 @@ class ReactionGame(app.App):
                 self,
                 [
                     "Reaction",
-                    "Version: 0.1.0",
+                    "Version: {}".format(APP_VERSION),
                     "",
                     "Touch the lit pad!",
                     "CANCEL exits a round",
