@@ -1,5 +1,9 @@
 # Reaction
 
+![Play](https://github.com/emericklaw/tildagon-app-reaction/blob/main/images/play.jpg?raw=true)
+
+![Failed](https://github.com/emericklaw/tildagon-app-reaction/blob/main/images/failed.jpg?raw=true)
+
 A reaction-game, LED lights up and you touch the corresponding pad to
 trigger it.
 
